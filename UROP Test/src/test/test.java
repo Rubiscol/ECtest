@@ -26,11 +26,11 @@ public class test {
 	public final static BigInteger THREE = BigInteger.valueOf(3);
 	public static Integer securityParameter;
 	public static void main(String[] args) throws GeneralSecurityException {
-		run();
+		testEncrypt();
 
 	}
-	private static void run() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-		//Initiate the two KeyPairs
+	private static void testEncrypt() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+	
 		KeyPair k1=generateRandom();
 		ECPublicKey PublicKey1=(ECPublicKey)k1.getPublic();
 		ECPrivateKey PrivateKey1=(ECPrivateKey)k1.getPrivate();
@@ -38,13 +38,9 @@ public class test {
 		System.out.println("The generators's KeyPair: ");
 		System.out.println(PublicKey1);
 		System.out.println("Private Key is: "+getPrivateKeyAsHex(PrivateKey1));
-		ECPoint p1=PublicKey1.getW();
-	
-		
 		System.out.print("Please specify your the security parameter: ");
 		Scanner scanner = new Scanner(System.in);
 		securityParameter =scanner.nextInt();
-		
 		BigInteger messageBigInteger=nextRandomBigInteger(40);
 		System.out.println("The raw message is: "+messageBigInteger);
 		BigInteger label=nextRandomBigInteger(securityParameter);
@@ -54,15 +50,11 @@ public class test {
 		System.out.println("The s_1 is: "+s_1);
 		System.out.println("The s_2 is: "+s_2);
 		Encryption tEncryption=new Encryption(messageBigInteger,label,s_1,s_2);
+		ECPoint p1=PublicKey1.getW();
 		ECPoint point=tEncryption.getCipherText(p1, curve);
-		
 		System.out.println("The x coordinate of cipherText is: "+point.getAffineX());
 		System.out.println("The y coordinate of cipherText is: "+point.getAffineY());
 		scanner.close();
-		
-		
-		
-		
 	}
 	public static BigInteger nextRandomBigInteger(Integer securityParameter) {
 		BigInteger n=TWO.pow(securityParameter);
