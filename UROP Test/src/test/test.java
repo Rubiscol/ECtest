@@ -46,7 +46,7 @@ public class test {
 		System.out.println("msk=");
 		msk.forEach(s->{
 			System.out.println("s1: "+s.getKey());
-			System.out.println("s2: "+s.getKey());
+			System.out.println("s2: "+s.getValue());
 		});
 		DKeyGen dKeyGen=new DKeyGen(msk, w, TWO.pow(securityParameter));
 		Triplet<ArrayList<BigInteger>,ECPoint,ECPoint> fpkTriplet=
@@ -77,7 +77,9 @@ public class test {
 		scanner.close();
 		nscanner.close();
 		for(int i=0;i<n;i++) {
-			Pair<BigInteger, BigInteger> s=new Pair<>(nextRandomBigInteger(securityParameter),nextRandomBigInteger(securityParameter));
+			BigInteger s_1=nextRandomBigInteger(securityParameter);
+			BigInteger s_2=nextRandomBigInteger(securityParameter);
+			Pair<BigInteger, BigInteger> s=new Pair<>(s_1,s_2);
 			msk.add(s);
 			w.add(nextRandomBigInteger(securityParameter));
 		}
