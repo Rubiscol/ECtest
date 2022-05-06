@@ -29,6 +29,9 @@ public class DKeyGen {
 			ws_1=(ws_1.add(w.get(i).multiply(msk.get(i).getKey()))).mod(p);
 			ws_2=(ws_2.add(w.get(i).multiply(msk.get(i).getValue()))).mod(p);			
 		}
+		System.out.println("fsk is");
+		System.out.println(ws_1);
+		System.out.println(ws_2);
 		
 		
 	}

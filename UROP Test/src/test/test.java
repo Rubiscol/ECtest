@@ -35,12 +35,14 @@ public class test {
 	public static ECPrivateKey PrivateKey;
 	public static void main(String[] args) throws GeneralSecurityException {
 		Setup();
-		testEncrypt();
 		testDKeyGen();
+		testEncrypt();
 
 	}
 	private static void testDKeyGen() {
-		System.out.println("---------------------");
+		System.out.println("---------------------------------------");
+		System.out.println("DKeyGen");
+		System.out.println("---------------------------------------");
 		System.out.println("DKeyGen(msk, w):");
 		
 		System.out.println("msk=");
@@ -66,6 +68,9 @@ public class test {
 		
 	}
 	private static void Setup() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+		System.out.println("---------------------------------------");
+		System.out.println("Setup");
+		System.out.println("---------------------------------------");
 		System.out.print("Please specify your the security parameter: ");
 		Scanner scanner = new Scanner(System.in);
 		msk=new ArrayList<>();
@@ -90,7 +95,9 @@ public class test {
 	}
 	private static void testEncrypt() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 	
-		
+		System.out.println("---------------------------------------");
+		System.out.println("Encrypt");
+		System.out.println("---------------------------------------");
 		EllipticCurve curve =PrivateKey.getParams().getCurve();
 		System.out.println("The generators's KeyPair: ");
 		System.out.println(PublicKey);
@@ -99,15 +106,15 @@ public class test {
 		System.out.println("The raw message is: "+messageBigInteger);
 		BigInteger label=nextRandomBigInteger(securityParameter);
 		System.out.println("The label is: "+label);
-		BigInteger s_1 =nextRandomBigInteger(securityParameter);
-		BigInteger s_2=nextRandomBigInteger(securityParameter);
-		System.out.println("The s_1 is: "+s_1);
-		System.out.println("The s_2 is: "+s_2);
-		Encryption tEncryption=new Encryption(messageBigInteger,label,s_1,s_2);
 		ECPoint p1=PublicKey.getW();
-		ECPoint point=tEncryption.getCipherText(p1, curve);
-		System.out.println("The x coordinate of cipherText is: "+point.getAffineX());
-		System.out.println("The y coordinate of cipherText is: "+point.getAffineY());
+		System.out.println("---------------------------------------");
+		for(int i=0;i<w.size();i++) {
+			Encryption tEncryption=new Encryption(messageBigInteger,label,msk.get(i).getKey(),msk.get(i).getValue());
+			ECPoint point=tEncryption.getCipherText(p1, curve);
+			System.out.println("The x coordinate of cipherText "+(i+1)+" is: "+point.getAffineX());
+			System.out.println("The y coordinate of cipherText "+(i+1)+" is: "+point.getAffineY());
+			System.out.println("");
+		}
 		
 	}
 	public static BigInteger nextRandomBigInteger(Integer securityParameter) {
