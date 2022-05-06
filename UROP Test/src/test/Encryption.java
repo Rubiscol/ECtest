@@ -18,8 +18,6 @@ public class Encryption {
 	private BigInteger originalmessage;
 	private BigInteger label;
 	private Pair<BigInteger, BigInteger> encryptionkey;
-	public final static BigInteger TWO = BigInteger.valueOf(2); 
-	public final static BigInteger THREE = BigInteger.valueOf(3);
 	public Encryption(BigInteger x, BigInteger label, BigInteger s_1, BigInteger s_2) {
 		originalmessage = x;
 		this.label = label;
@@ -30,11 +28,12 @@ public class Encryption {
 	public ECPoint getCipherText(ECPoint G,EllipticCurve curve) throws NoSuchAlgorithmException {
 		BigInteger h1=doSHA256(label);
 		BigInteger h2=doSHA256(h1);
-		ECPoint p1=scalmult(scalmult(G,h1, curve),encryptionkey.getKey(),curve);
-		ECPoint p2=scalmult(scalmult(G,h2, curve),encryptionkey.getValue(),curve);
-		ECPoint p3=scalmult(G,originalmessage,curve);
-		ECPoint p4=addPoint(p2, p3, curve);
-		ECPoint finalEcPoint=addPoint(p1, p4, curve);
+		ECPointCalculator ecPointCalculator=new ECPointCalculator();
+		ECPoint p1=ecPointCalculator.scalmult(ecPointCalculator.scalmult(G,h1, curve),encryptionkey.getKey(),curve);
+		ECPoint p2=ecPointCalculator.scalmult(ecPointCalculator.scalmult(G,h2, curve),encryptionkey.getValue(),curve);
+		ECPoint p3=ecPointCalculator.scalmult(G,originalmessage,curve);
+		ECPoint p4=ecPointCalculator.addPoint(p2, p3, curve);
+		ECPoint finalEcPoint=ecPointCalculator.addPoint(p1, p4, curve);
 		return finalEcPoint;
 	}
 
@@ -45,62 +44,6 @@ public class Encryption {
 		byte[] hash = digest.digest(t.toString().getBytes(StandardCharsets.UTF_8));
 		return new BigInteger(hash);
 	}
-    private static ECPoint doublePoint(ECPoint r, EllipticCurve curve) {
-  	  if (r.equals(ECPoint.POINT_INFINITY)) 
-  	    return r;
-  	  BigInteger slope = (r.getAffineX().pow(2)).multiply(THREE);
-  	  slope = slope.add(curve.getA());
-  	  BigInteger prime = ((ECFieldFp) curve.getField()).getP();
-  	  // use NBI modInverse();
-  	  BigInteger tmp = r.getAffineY().multiply(TWO);
-  	  tmp = new NativeBigInteger(tmp);
-  	  slope = slope.multiply(tmp.modInverse(prime));
-  	  BigInteger xOut = slope.pow(2).subtract(r.getAffineX().multiply(TWO)).mod(prime);
-  	  BigInteger yOut = (r.getAffineY().negate()).add(slope.multiply(r.getAffineX().subtract(xOut))).mod(prime);
-  	  ECPoint out = new ECPoint(xOut, yOut);
-  	  return out;
-  	}
-  public static ECPoint addPoint(ECPoint r, ECPoint s, EllipticCurve curve) {
-  	  if (r.equals(s))
-  	    return doublePoint(r, curve);
-  	  else if (r.equals(ECPoint.POINT_INFINITY))
-  	    return s;
-  	  else if (s.equals(ECPoint.POINT_INFINITY))
-  	    return r;
-  	  BigInteger prime = ((ECFieldFp) curve.getField()).getP();
-  	  // use NBI modInverse();
-  	  BigInteger tmp = r.getAffineX().subtract(s.getAffineX());
-  	  tmp = new NativeBigInteger(tmp);
-  	  BigInteger slope = (r.getAffineY().subtract(s.getAffineY())).multiply(tmp.modInverse(prime)).mod(prime);
-  	  slope = new NativeBigInteger(slope);
-  	  BigInteger xOut = (slope.modPow(TWO, prime).subtract(r.getAffineX())).subtract(s.getAffineX()).mod(prime);
-  	  BigInteger yOut = s.getAffineY().negate().mod(prime);
-  	  yOut = yOut.add(slope.multiply(s.getAffineX().subtract(xOut))).mod(prime);
-  	  ECPoint out = new ECPoint(xOut, yOut);
-  	  return out;
-  	}
-
-  public static ECPoint scalmult(ECPoint P, BigInteger kin,EllipticCurve curve){
-      //ECPoint R=P; - incorrect
-      ECPoint R = ECPoint.POINT_INFINITY,S = P;
-      BigInteger p = ((ECFieldFp) curve.getField()).getP();
-      BigInteger k = kin.mod(p);
-      int length = k.bitLength();
-      //System.out.println("length is" + length);
-      byte[] binarray = new byte[length];
-      for(int i=0;i<=length-1;i++){
-          binarray[i] = k.mod(TWO).byteValue ();
-          k = k.divide(TWO);
-      }
-   
-      for(int i = length-1;i >= 0;i--){
-          // i should start at length-1 not -2 because the MSB of binarry may not be 1
-          R = doublePoint(R,curve);
-          if(binarray[i]== 1) 
-              R = addPoint(R, S,curve);
-      }
-  return R;
-  }
-	
+    
 
 }
