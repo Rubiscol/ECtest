@@ -12,7 +12,7 @@ public class ECPointCalculator {
 	public final static BigInteger THREE = BigInteger.valueOf(3);
 
 
-private  ECPoint doublePoint(ECPoint r, EllipticCurve curve) {
+private static ECPoint doublePoint(ECPoint r, EllipticCurve curve) {
 	  if (r.equals(ECPoint.POINT_INFINITY)) 
 	    return r;
 	  BigInteger slope = (r.getAffineX().pow(2)).multiply(THREE);
@@ -27,7 +27,7 @@ private  ECPoint doublePoint(ECPoint r, EllipticCurve curve) {
 	  ECPoint out = new ECPoint(xOut, yOut);
 	  return out;
 	}
-public  ECPoint addPoint(ECPoint r, ECPoint s, EllipticCurve curve) {
+public  static ECPoint addPoint(ECPoint r, ECPoint s, EllipticCurve curve) {
 	  if (r.equals(s))
 	    return doublePoint(r, curve);
 	  else if (r.equals(ECPoint.POINT_INFINITY))
@@ -47,7 +47,7 @@ public  ECPoint addPoint(ECPoint r, ECPoint s, EllipticCurve curve) {
 	  return out;
 	}
 
-public  ECPoint scalmult(ECPoint P, BigInteger kin,EllipticCurve curve){
+public static ECPoint scalmult(ECPoint P, BigInteger kin,EllipticCurve curve){
     //ECPoint R=P; - incorrect
     ECPoint R = ECPoint.POINT_INFINITY,S = P;
     BigInteger p = ((ECFieldFp) curve.getField()).getP();

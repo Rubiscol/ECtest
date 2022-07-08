@@ -1,49 +1,50 @@
 package test;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.ECFieldFp;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
-import java.util.HashMap;
-
-import org.bouncycastle.util.encoders.Hex;
-
 import javafx.util.Pair;
-import net.i2p.util.NativeBigInteger;
 
 public class Encryption {
 	private BigInteger originalmessage;
 	private BigInteger label;
+	private Pair<ECPoint, ECPoint> ut;
 	private Pair<BigInteger, BigInteger> encryptionkey;
-	public Encryption(BigInteger x, BigInteger label, BigInteger s_1, BigInteger s_2) {
+	private ECPoint G;
+	private EllipticCurve curve;
+	
+	public Encryption(BigInteger x, BigInteger label, BigInteger s_1, BigInteger s_2,ECPoint G,EllipticCurve curve) {
 		originalmessage = x;
 		this.label = label;
 		encryptionkey = new Pair<BigInteger, BigInteger>(s_1, s_2);
+		this.G=G;
+		this.curve=curve;
+		
 		
 	}
-
-	public ECPoint getCipherText(ECPoint G,EllipticCurve curve) throws NoSuchAlgorithmException {
-		BigInteger h1=doSHA256(label);
-		BigInteger h2=doSHA256(h1);
-		ECPointCalculator ecPointCalculator=new ECPointCalculator();
-		ECPoint p1=ecPointCalculator.scalmult(ecPointCalculator.scalmult(G,h1, curve),encryptionkey.getKey(),curve);
-		ECPoint p2=ecPointCalculator.scalmult(ecPointCalculator.scalmult(G,h2, curve),encryptionkey.getValue(),curve);
-		ECPoint p3=ecPointCalculator.scalmult(G,originalmessage,curve);
-		ECPoint p4=ecPointCalculator.addPoint(p2, p3, curve);
-		ECPoint finalEcPoint=ecPointCalculator.addPoint(p1, p4, curve);
+	public Pair<ECPoint, ECPoint> getut() throws NoSuchAlgorithmException {
+		
+//		BigInteger h1=testUROP.nextRandomBigInteger(testUROP.securityParameter);
+		BigInteger h1=SHA256Calculator.doSHA256(label);
+		BigInteger h2=SHA256Calculator.doSHA256(h1);
+		ut=new Pair<ECPoint, ECPoint>(ECPointCalculator.scalmult(G,h1, curve), ECPointCalculator.scalmult(G,h2, curve));
+		return ut;
+	}
+	
+	public ECPoint getCipherText() throws NoSuchAlgorithmException {
+		
+		
+		ut=getut();
+		ECPoint p1=ECPointCalculator.scalmult(ut.getKey(),encryptionkey.getKey(),curve);
+		ECPoint p2=ECPointCalculator.scalmult(ut.getValue(),encryptionkey.getValue(),curve);
+		ECPoint p3=ECPointCalculator.scalmult(G,originalmessage,curve);
+		ECPoint p4=ECPointCalculator.addPoint(p2, p3, curve);
+		ECPoint finalEcPoint=ECPointCalculator.addPoint(p1, p4, curve);
 		return finalEcPoint;
 	}
-
 	
-	public BigInteger doSHA256(BigInteger t) throws NoSuchAlgorithmException {
-		// Here I directly hash the string of the bigInteger and may cause problems
-		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		byte[] hash = digest.digest(t.toString().getBytes(StandardCharsets.UTF_8));
-		return new BigInteger(hash);
-	}
+	
     
 
 }

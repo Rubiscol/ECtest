@@ -22,7 +22,7 @@ public class DKeyGen {
 		
 		// TODO Auto-generated constructor stub
 	}
-	private void getfsk(){
+	public Pair<BigInteger, BigInteger> getfsk(){
 		ws_1=BigInteger.ZERO;
 		ws_2=BigInteger.ZERO;
 		for(int i=0;i<w.size();i++) {
@@ -32,13 +32,13 @@ public class DKeyGen {
 		System.out.println("fsk is");
 		System.out.println(ws_1);
 		System.out.println(ws_2);
-		
+		return new Pair<BigInteger, BigInteger>(ws_1, ws_2);
 		
 	}
 	public Triplet<ArrayList<BigInteger>,ECPoint,ECPoint> getfpk(ECPoint G,EllipticCurve curve) {
 		getfsk();
-		ECPointCalculator ecPointCalculator=new ECPointCalculator();
-		fpk=new Triplet<ArrayList<BigInteger>, ECPoint, ECPoint>(w,ecPointCalculator.scalmult(G, ws_1, curve),ecPointCalculator.scalmult(G, ws_2, curve));
+	
+		fpk=new Triplet<ArrayList<BigInteger>, ECPoint, ECPoint>(w,ECPointCalculator.scalmult(G, ws_1, curve),ECPointCalculator.scalmult(G, ws_2, curve));
 		return fpk;
 		
 	}

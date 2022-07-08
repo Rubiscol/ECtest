@@ -7,10 +7,10 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/bouncycastle_lib"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/new"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Agroa"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/javafx"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Tuple"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Users/GU YI/Downloads/jar_files.zip"/>
+	<classpathentry kind="lib" path="C:/Users/GU YI/git/repository/repository/openjfx-18.0.1_windows-x64_bin-sdk/javafx-sdk-18.0.1/lib/javafx.base.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
