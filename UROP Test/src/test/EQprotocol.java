@@ -43,37 +43,49 @@ public class EQprotocol {
     	
     }
     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    	for (int i=0;i<100;i++) {
     	KeyPair k1=testUROP.generateRandom();
     	ECPublicKey publickey=(ECPublicKey)k1.getPublic();
 		ECPrivateKey privatekey=(ECPrivateKey)k1.getPrivate();
 		EllipticCurve G =privatekey.getParams().getCurve();
 		ECPoint g=publickey.getW();
-    	System.out.println("g x "+g.getAffineX());
-    	System.out.println("g y "+g.getAffineY());
+//    	System.out.println("g x "+g.getAffineX());
+//    	System.out.println("g y "+g.getAffineY());
     	ECPoint h=ECPointCalculator.scalmult(g, BigInteger.valueOf(3), G);
-    	System.out.println("h x "+h.getAffineX());
-    	System.out.println("h y "+h.getAffineY());
+//    	System.out.println("h x "+h.getAffineX());
+//    	System.out.println("h y "+h.getAffineY());
     	
     	BigInteger y=testUROP.nextRandomBigInteger(testUROP.securityParameter);
-    	System.out.println("y "+y);
+//    	System.out.println("y "+y);
     	BigInteger u=testUROP.nextRandomBigInteger(testUROP.securityParameter);
-    	System.out.println("u "+u);
+//    	System.out.println("u "+u);
     	BigInteger c=testUROP.nextRandomBigInteger(testUROP.securityParameter);
-    	System.out.println("c "+c);
+//    	System.out.println("c "+c);
+    	
+    	
     	BigInteger z=u.add(c.multiply(y));
-    	System.out.println("z "+z);
+//    	System.out.println("z "+z);
 //    	System.out.println("result :"+unitedTest(G,g,h,y));
     	
     	ECPoint zg=ECPointCalculator.scalmult(g, z, G);
     	ECPoint ug=ECPointCalculator.scalmult(g, u, G);
     	ECPoint yg=ECPointCalculator.scalmult(g, y, G);
-    	ECPoint cyg=ECPointCalculator.scalmult(g, y.multiply(c),G);
+    	BigInteger cy=y.multiply(c);
+    	ECPoint cyg=ECPointCalculator.scalmult(g, cy,G);
     	ECPoint ugcyg=ECPointCalculator.addPoint(ug, cyg, G);
     	System.out.println("Whether z*g=u*g+(c*y)*g: "+zg.equals(ugcyg));
     	cyg=ECPointCalculator.scalmult(yg, c,G);
     	ugcyg=ECPointCalculator.addPoint(ug, cyg, G);
     	System.out.println("Whether z*g=u*g+c*(y*g): "+zg.equals(ugcyg));
-    			
+    	System.out.println(" ");
+    	
+    	
+//    	z=c.multiply(y);
+//    	zg=ECPointCalculator.scalmult(g, z, G);
+//    	ECPoint cy=ECPointCalculator.scalmult(g, c.multiply(y), G);
+//    	System.out.println(zg.equals(cy));
+    	
+    	}	
     	
     }
     public boolean NIZKtest() throws NoSuchAlgorithmException {

@@ -21,6 +21,8 @@ public class prover {
 //	}
 	
 	public static Triplet<ECPoint,ECPoint,BigInteger> proverTest(EllipticCurve G, ECPoint g,ECPoint h,ECPoint gy, ECPoint hy,BigInteger y) throws NoSuchAlgorithmException {
+		System.out.println("============");
+		System.out.println("Prover");
     	BigInteger u=testUROP.nextRandomBigInteger(testUROP.securityParameter);
     	
     	ECPoint gu=ECPointCalculator.scalmult(g, u, G);
@@ -34,9 +36,13 @@ public class prover {
     	// I don't know 
     	BigInteger c=SHA256Calculator.doSHA256(hashPoint.hashCode());
 
-    	System.out.println("In prover c= "+c);
+    	
     	BigInteger z=u.add(c.multiply(y));
     	Triplet<ECPoint,ECPoint,BigInteger> H=new Triplet<>(gu, hu, z);
+    	
+    	System.out.println("z"+H.getValue2());
+    	System.out.println("ug"+H.getValue0().getAffineX());
+    	System.out.println("uh"+H.getValue1().getAffineX());
     	return H;
 
     }

@@ -28,7 +28,7 @@ import net.i2p.util.NativeBigInteger;
 public class testUROP {
 	public final static BigInteger TWO = BigInteger.valueOf(2); // constant for scalar operations
 	public final static BigInteger THREE = BigInteger.valueOf(3);
-	public static Integer securityParameter=1000;
+	public static Integer securityParameter=100;
 	public static ArrayList<Pair<BigInteger, BigInteger>> msk;
 	public static Pair<BigInteger, BigInteger> fsk;
 	public static ArrayList<BigInteger> w;
