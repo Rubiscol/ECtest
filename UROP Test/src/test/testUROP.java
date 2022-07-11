@@ -12,12 +12,17 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECFieldFp;
 import java.security.spec.ECGenParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.EllipticCurve;
+import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.math.ec.ECFieldElement;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.util.encoders.Hex;
 import org.javatuples.Triplet;
 import org.minidns.record.AAAA;
@@ -28,34 +33,34 @@ import net.i2p.util.NativeBigInteger;
 public class testUROP {
 	public final static BigInteger TWO = BigInteger.valueOf(2); // constant for scalar operations
 	public final static BigInteger THREE = BigInteger.valueOf(3);
-	public static Integer securityParameter=100;
+	public static Integer securityParameter;
 	public static ArrayList<Pair<BigInteger, BigInteger>> msk;
 	public static Pair<BigInteger, BigInteger> fsk;
 	public static ArrayList<BigInteger> w;
 	public static Pair<ECPoint, ECPoint> utEcPoint;
-	public static ECPublicKey PublicKey;
-	public static ECPrivateKey PrivateKey;
-	
+//	public static ECPublicKey PublicKey;
+//	public static ECPrivateKey PrivateKey;
+	public static ECPoint g;
 	
 		
-//	public static void main(String[] args) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException  {
-//		
-//		Setup();
-//		testDKeyGen();
-//		testEncrypt();
-//		
-//		testNIZP();
-//		
-//		
-//	}
-	private static void testNIZP() throws NoSuchAlgorithmException {
+	public static void main(String[] args) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException  {
+		
+		Setup();
+		testDKeyGen();
+		testEncrypt();
+		
+		testNIZP();
+		
+		
+	}
+	private static void testNIZP() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 		System.out.println("---------------------------------------");
 		System.out.println("Test Zero Knowledge provement");
 		System.out.println("---------------------------------------");
 		BigInteger a=nextRandomBigInteger(securityParameter);
 		System.out.println("Hi broker, your random a is "+a);
-		EllipticCurve curve =PrivateKey.getParams().getCurve();
-		EQprotocol protocol =new EQprotocol(PublicKey.getW(),fsk,a,utEcPoint,curve);
+		
+		EQprotocol protocol =new EQprotocol(g,fsk,a,utEcPoint,g.getCurve());
 		if(protocol.NIZKtest()) {
 			System.out.println("Pass the four tests");
 		}
@@ -78,7 +83,7 @@ public class testUROP {
 		});
 		DKeyGen dKeyGen=new DKeyGen(msk, w, TWO.pow(securityParameter));
 		Triplet<ArrayList<BigInteger>,ECPoint,ECPoint> fpkTriplet=
-				dKeyGen.getfpk(PublicKey.getW(), PrivateKey.getParams().getCurve());
+				dKeyGen.getfpk(g, g.getCurve());
 		System.out.println("The w of fpk is: ");
 		System.out.println("vector of weights w=");
 		for(int i=0;i<w.size();i++) {
@@ -86,11 +91,11 @@ public class testUROP {
 		}
 		fsk=dKeyGen.getfsk();
 		System.out.println("The first point of fpk is: ");
-		System.out.println("The x coordinate :"+fpkTriplet.getValue1().getAffineX());
-		System.out.println("The y coordinate :"+fpkTriplet.getValue1().getAffineY());
+		System.out.println("The x coordinate :"+fpkTriplet.getValue1().getAffineXCoord());
+		System.out.println("The y coordinate :"+fpkTriplet.getValue1().getAffineYCoord());
 		System.out.println("The second point of fpk is: ");
-		System.out.println("The x coordinate :"+fpkTriplet.getValue2().getAffineX());
-		System.out.println("The y coordinate :"+fpkTriplet.getValue2().getAffineY());
+		System.out.println("The x coordinate :"+fpkTriplet.getValue2().getAffineXCoord());
+		System.out.println("The y coordinate :"+fpkTriplet.getValue2().getAffineYCoord());
 		// TODO Auto-generated method stub
 		
 	}
@@ -115,9 +120,8 @@ public class testUROP {
 			msk.add(s);
 			w.add(nextRandomBigInteger(securityParameter));
 		}
-		KeyPair k1=generateRandom();
-		PublicKey=(ECPublicKey)k1.getPublic();
-		PrivateKey=(ECPrivateKey)k1.getPrivate();
+		ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256k1");
+		g=spec.getG();
 		
 	}
 	private static void testEncrypt() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
@@ -125,21 +129,20 @@ public class testUROP {
 		System.out.println("---------------------------------------");
 		System.out.println("Encrypt");
 		System.out.println("---------------------------------------");
-		EllipticCurve curve =PrivateKey.getParams().getCurve();
-		System.out.println("The generators's KeyPair: ");
-		System.out.println(PublicKey); 
-		System.out.println("Private Key is: "+getPrivateKeyAsHex(PrivateKey));
+		ECCurve curve =g.getCurve();
+		System.out.println("The generator is : "+g.toString());
+		
 		BigInteger messageBigInteger=nextRandomBigInteger(40);
 		System.out.println("The raw message is: "+messageBigInteger);
 		BigInteger label=nextRandomBigInteger(securityParameter);
 		System.out.println("The label is: "+label);
-		ECPoint p1=PublicKey.getW();
+		
 		System.out.println("---------------------------------------");
 		for(int i=0;i<w.size();i++) {
-			Encryption tEncryption=new Encryption(messageBigInteger,label,msk.get(i).getKey(),msk.get(i).getValue(),p1, curve);
+			Encryption tEncryption=new Encryption(messageBigInteger,label,msk.get(i).getKey(),msk.get(i).getValue(),g, curve);
 			ECPoint point=tEncryption.getCipherText();
-			System.out.println("The x coordinate of cipherText "+(i+1)+" is: "+point.getAffineX());
-			System.out.println("The y coordinate of cipherText "+(i+1)+" is: "+point.getAffineY());
+			System.out.println("The x coordinate of cipherText "+(i+1)+" is: "+point.getAffineXCoord());
+			System.out.println("The y coordinate of cipherText "+(i+1)+" is: "+point.getAffineYCoord());
 			System.out.println("");
 			utEcPoint=tEncryption.getut();
 			
@@ -157,22 +160,22 @@ public class testUROP {
 	    }
 	    return result;
 	}
-	public static KeyPair generateRandom() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
-		ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec("secp256r1");
-		keyPairGenerator.initialize(ecGenParameterSpec, new SecureRandom());
-		KeyPair keyPair = keyPairGenerator.generateKeyPair();
-		return keyPair;
-	}
-	public static ECPoint generateRandomECPoint() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
-		ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec("secp256r1");
-		keyPairGenerator.initialize(ecGenParameterSpec, new SecureRandom());
-		KeyPair keyPair = keyPairGenerator.generateKeyPair();
-		PublicKey=(ECPublicKey)keyPair.getPublic();
-		ECPoint p1=PublicKey.getW();
-		return p1;
-	}
+//	public static KeyPair generateRandom() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+//		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
+//		ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec("secp256r1");
+//		keyPairGenerator.initialize(ecGenParameterSpec, new SecureRandom());
+//		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+//		return keyPair;
+//	}
+//	public static ECPoint generateRandomECPoint() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+//		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
+//		ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec("secp256r1");
+//		keyPairGenerator.initialize(ecGenParameterSpec, new SecureRandom());
+//		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+//		PublicKey=(ECPublicKey)keyPair.getPublic();
+//		ECPoint p1=PublicKey.getW();
+//		return p1;
+//	}
 	//These two functions below are used to print the privateKey
     private static String getPrivateKeyAsHex(PrivateKey privateKey) {
 

@@ -12,5 +12,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Tuple"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="C:/Users/GU YI/git/repository/repository/openjfx-18.0.1_windows-x64_bin-sdk/javafx-sdk-18.0.1/lib/javafx.base.jar"/>
+	<classpathentry kind="lib" path="C:/Users/GU YI/git/repository/repository/core-libart-Lollipop_5.1_22.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

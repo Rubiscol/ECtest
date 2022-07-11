@@ -2,8 +2,8 @@ package test;
 
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.ECPoint;
-import java.security.spec.EllipticCurve;
+import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.ECCurve;
 import javafx.util.Pair;
 
 public class Encryption {
@@ -12,9 +12,9 @@ public class Encryption {
 	private Pair<ECPoint, ECPoint> ut;
 	private Pair<BigInteger, BigInteger> encryptionkey;
 	private ECPoint G;
-	private EllipticCurve curve;
+	private ECCurve curve;
 	
-	public Encryption(BigInteger x, BigInteger label, BigInteger s_1, BigInteger s_2,ECPoint G,EllipticCurve curve) {
+	public Encryption(BigInteger x, BigInteger label, BigInteger s_1, BigInteger s_2,ECPoint G,ECCurve curve) {
 		originalmessage = x;
 		this.label = label;
 		encryptionkey = new Pair<BigInteger, BigInteger>(s_1, s_2);
@@ -28,7 +28,7 @@ public class Encryption {
 //		BigInteger h1=testUROP.nextRandomBigInteger(testUROP.securityParameter);
 		BigInteger h1=SHA256Calculator.doSHA256(label);
 		BigInteger h2=SHA256Calculator.doSHA256(h1);
-		ut=new Pair<ECPoint, ECPoint>(ECPointCalculator.scalmult(G,h1, curve), ECPointCalculator.scalmult(G,h2, curve));
+		ut=new Pair<ECPoint, ECPoint>(G.multiply(h1).normalize(), G.multiply(h2).normalize());
 		return ut;
 	}
 	
@@ -36,12 +36,12 @@ public class Encryption {
 		
 		
 		ut=getut();
-		ECPoint p1=ECPointCalculator.scalmult(ut.getKey(),encryptionkey.getKey(),curve);
-		ECPoint p2=ECPointCalculator.scalmult(ut.getValue(),encryptionkey.getValue(),curve);
-		ECPoint p3=ECPointCalculator.scalmult(G,originalmessage,curve);
-		ECPoint p4=ECPointCalculator.addPoint(p2, p3, curve);
-		ECPoint finalEcPoint=ECPointCalculator.addPoint(p1, p4, curve);
-		return finalEcPoint;
+		ECPoint p1=ut.getKey().multiply(encryptionkey.getKey());
+		ECPoint p2=ut.getValue().multiply(encryptionkey.getValue());
+		ECPoint p3=G.multiply(originalmessage);
+		ECPoint p4=p2.add(p3);
+		ECPoint finalEcPoint=p1.add(p4);
+		return finalEcPoint.normalize();
 	}
 	
 	

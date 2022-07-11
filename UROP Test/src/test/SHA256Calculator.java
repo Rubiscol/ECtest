@@ -11,7 +11,7 @@ public class SHA256Calculator {
 		// TODO Auto-generated method stub
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		byte[] hash = digest.digest(label.toString().getBytes(StandardCharsets.UTF_8));
-		return new BigInteger(hash);
+		return new BigInteger(hash).abs();
 	}
 	public static BigInteger doSHA256(Integer n) throws NoSuchAlgorithmException {
 		// TODO Auto-generated method stub

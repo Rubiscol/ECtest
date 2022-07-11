@@ -2,41 +2,46 @@ package test;
 
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.ECPoint;
-import java.security.spec.EllipticCurve;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.math.ec.ECFieldElement;
+import org.bouncycastle.math.ec.ECPoint;
 
 import org.javatuples.Triplet;
 
 public class verifier {
 	
-	 public static boolean verifierTest(EllipticCurve G, ECPoint g,ECPoint h,ECPoint gy, ECPoint hy,Triplet<ECPoint,ECPoint,BigInteger>H) throws NoSuchAlgorithmException {
+	 public static boolean verifierTest(ECCurve G, ECPoint g,ECPoint h,ECPoint yg, ECPoint yh,Triplet<ECPoint,ECPoint,BigInteger>H) throws NoSuchAlgorithmException {
 		    System.out.println("============");
 	    	System.out.println("Verifier");
-	    	System.out.println("z"+H.getValue2());
-	    	System.out.println("ug"+H.getValue0().getAffineX());
-	    	System.out.println("uh"+H.getValue1().getAffineX());
-	    	ECPoint hashPoint=ECPointCalculator.addPoint(g, h, G);
-	    	hashPoint=ECPointCalculator.addPoint(hashPoint,H.getValue0(), G);
-	    	hashPoint=ECPointCalculator.addPoint(hashPoint, H.getValue1(), G);
-	    	hashPoint=ECPointCalculator.addPoint(gy, hashPoint, G);
-	    	hashPoint=ECPointCalculator.addPoint(hy, hashPoint, G);
-	    	// I don't know 
+	    	
+	    	BigInteger z=H.getValue2();
+	    	ECPoint ug=H.getValue0();
+	    	ECPoint uh=H.getValue1();
+	    	System.out.println("Verifier z "+z);
+	    	System.out.println("Verifier ug "+ug.getAffineXCoord());
+	    	System.out.println("Verifier uh "+uh.getAffineXCoord());
+	    	
+	    	ECPoint hashPoint=g.add(h);
+	    	hashPoint=hashPoint.add(ug).normalize();
+	    	hashPoint=hashPoint.add(uh).normalize();
+	    	hashPoint=hashPoint.add(yg).normalize();
+	    	hashPoint=hashPoint.add(yh).normalize();
 	    	BigInteger c=SHA256Calculator.doSHA256(hashPoint.hashCode());
-	    	System.out.println("In verifier c= "+c);
-	    	ECPoint left0=ECPointCalculator.scalmult(g, H.getValue2(), G);
-	    	ECPoint right0=ECPointCalculator.scalmult(gy, c, G);
+	    	System.out.println("Prover c "+c);
 	    	
-	    	right0=ECPointCalculator.addPoint(right0, H.getValue0(), G);
+	    	ECPoint zg=g.multiply(z).normalize();
+	    	System.out.println("Verifier zg "+zg.getAffineXCoord());
+
+	    	ECPoint cgy=yg.multiply(c).normalize();
+	    	System.out.println("Verifier cyg "+cgy.getAffineXCoord());
+	 	    ECPoint ugcgy=cgy.add(ug).normalize();
+	 	    System.out.println("Verifier ugcyg "+ugcgy.getAffineXCoord());
+	    	ECPoint zh=h.multiply(z).normalize();
+	    	ECPoint chy=yh.multiply(c).normalize();
 	    	
-	    	ECPoint left1=ECPointCalculator.scalmult(h, H.getValue2(), G);
-	    	ECPoint right1=ECPointCalculator.scalmult(hy, c, G);
-	    	
-	    	right1=ECPointCalculator.addPoint(right1, H.getValue1(), G);
-	    	System.out.println("left0=");
-	    	System.out.println(left0.getAffineX());
-	    	System.out.println("righ0=");
-	    	System.out.println(right0.getAffineX());
-	    	if(left0.equals(right0)&&left1.equals(right1)) {
+	    	ECPoint uhchy=chy.add(uh).normalize();
+	    	System.out.println(zg.equals(ugcgy));
+	    	if(zg.equals(ugcgy)&& zh.equals(uhchy)) {	
 	    		return true;
 	    	}
 	    	else {

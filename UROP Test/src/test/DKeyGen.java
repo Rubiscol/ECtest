@@ -3,8 +3,8 @@ package test;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import org.javatuples.Triplet;
-import java.security.spec.ECPoint;
-import java.security.spec.EllipticCurve;
+import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.ECCurve;
 
 import javafx.util.Pair;
 
@@ -35,10 +35,9 @@ public class DKeyGen {
 		return new Pair<BigInteger, BigInteger>(ws_1, ws_2);
 		
 	}
-	public Triplet<ArrayList<BigInteger>,ECPoint,ECPoint> getfpk(ECPoint G,EllipticCurve curve) {
+	public Triplet<ArrayList<BigInteger>,ECPoint,ECPoint> getfpk(ECPoint G,ECCurve curve) {
 		getfsk();
-	
-		fpk=new Triplet<ArrayList<BigInteger>, ECPoint, ECPoint>(w,ECPointCalculator.scalmult(G, ws_1, curve),ECPointCalculator.scalmult(G, ws_2, curve));
+		fpk=new Triplet<ArrayList<BigInteger>, ECPoint, ECPoint>(w,G.multiply(ws_1).normalize(),G.multiply(ws_2).normalize());
 		return fpk;
 		
 	}
