@@ -47,6 +47,7 @@ public class testUROP {
 		
 	public static void main(String[] args) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException  {
 		
+		
 		Setup();
 		testDKeyGen();
 		testEncrypt();
@@ -54,6 +55,7 @@ public class testUROP {
 		testDecryption(); 
 		
 	}
+	
 	private static void Setup() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 		System.out.println("---------------------------------------");
 		System.out.println("Setup");
@@ -208,23 +210,7 @@ public class testUROP {
 	    }
 	    return result;
 	}
-//	public static KeyPair generateRandom() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-//		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
-//		ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec("secp256r1");
-//		keyPairGenerator.initialize(ecGenParameterSpec, new SecureRandom());
-//		KeyPair keyPair = keyPairGenerator.generateKeyPair();
-//		return keyPair;
-//	}
-//	public static ECPoint generateRandomECPoint() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-//		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
-//		ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec("secp256r1");
-//		keyPairGenerator.initialize(ecGenParameterSpec, new SecureRandom());
-//		KeyPair keyPair = keyPairGenerator.generateKeyPair();
-//		PublicKey=(ECPublicKey)keyPair.getPublic();
-//		ECPoint p1=PublicKey.getW();
-//		return p1;
-//	}
-	//These two functions below are used to print the privateKey
+
     private static String getPrivateKeyAsHex(PrivateKey privateKey) {
 
         ECPrivateKey ecPrivateKey = (ECPrivateKey) privateKey;
