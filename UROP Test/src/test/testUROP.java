@@ -38,9 +38,11 @@ public class testUROP {
 	public static Pair<BigInteger, BigInteger> fsk;
 	public static ArrayList<BigInteger> w;
 	public static Pair<ECPoint, ECPoint> utEcPoint;
-//	public static ECPublicKey PublicKey;
-//	public static ECPrivateKey PrivateKey;
 	public static ECPoint g;
+	public static ArrayList<ECPoint> ciphertexts;
+	public static ArrayList<BigInteger> plaintexts;
+	//Newly added 
+	
 	
 		
 	public static void main(String[] args) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException  {
@@ -48,9 +50,35 @@ public class testUROP {
 		Setup();
 		testDKeyGen();
 		testEncrypt();
-		
 		testNIZP();
+		testDecryption(); 
 		
+	}
+	private static void Setup() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+		System.out.println("---------------------------------------");
+		System.out.println("Setup");
+		System.out.println("---------------------------------------");
+		System.out.print("Please specify your the security parameter: ");
+		Scanner scanner = new Scanner(System.in);
+		msk=new ArrayList<>();
+		w=new ArrayList<>();
+		plaintexts=new ArrayList<>();
+		securityParameter =scanner.nextInt();
+		System.out.print("Please specify your the number of ciphertexts n: ");
+		Scanner nscanner = new Scanner(System.in);
+		int n =nscanner.nextInt();
+		scanner.close();
+		nscanner.close();
+		for(int i=0;i<n;i++) {
+			BigInteger s_1=nextRandomBigInteger(securityParameter);
+			BigInteger s_2=nextRandomBigInteger(securityParameter);
+			Pair<BigInteger, BigInteger> s=new Pair<>(s_1,s_2);
+			msk.add(s);
+			w.add(nextRandomBigInteger(securityParameter));
+			plaintexts.add(nextRandomBigInteger(securityParameter));
+		}
+		ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256k1");
+		g=spec.getG();
 		
 	}
 	private static void testNIZP() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
@@ -99,31 +127,7 @@ public class testUROP {
 		// TODO Auto-generated method stub
 		
 	}
-	private static void Setup() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-		System.out.println("---------------------------------------");
-		System.out.println("Setup");
-		System.out.println("---------------------------------------");
-		System.out.print("Please specify your the security parameter: ");
-		Scanner scanner = new Scanner(System.in);
-		msk=new ArrayList<>();
-		w=new ArrayList<>();
-		securityParameter =scanner.nextInt();
-		System.out.print("Please specify your the number of ciphertexts n: ");
-		Scanner nscanner = new Scanner(System.in);
-		int n =nscanner.nextInt();
-		scanner.close();
-		nscanner.close();
-		for(int i=0;i<n;i++) {
-			BigInteger s_1=nextRandomBigInteger(securityParameter);
-			BigInteger s_2=nextRandomBigInteger(securityParameter);
-			Pair<BigInteger, BigInteger> s=new Pair<>(s_1,s_2);
-			msk.add(s);
-			w.add(nextRandomBigInteger(securityParameter));
-		}
-		ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256k1");
-		g=spec.getG();
-		
-	}
+	
 	private static void testEncrypt() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 	
 		System.out.println("---------------------------------------");
@@ -132,24 +136,68 @@ public class testUROP {
 		ECCurve curve =g.getCurve();
 		System.out.println("The generator is : "+g.toString());
 		
-		BigInteger messageBigInteger=nextRandomBigInteger(40);
-		System.out.println("The raw message is: "+messageBigInteger);
 		BigInteger label=nextRandomBigInteger(securityParameter);
 		System.out.println("The label is: "+label);
-		
+		ciphertexts=new ArrayList<>();
 		System.out.println("---------------------------------------");
 		for(int i=0;i<w.size();i++) {
-			Encryption tEncryption=new Encryption(messageBigInteger,label,msk.get(i).getKey(),msk.get(i).getValue(),g, curve);
+			System.out.println("The plaintext "+(i+1)+" is: "+plaintexts.get(i).toString());
+			Encryption tEncryption=new Encryption(plaintexts.get(i),label,msk.get(i).getKey(),msk.get(i).getValue(),g, curve);
 			ECPoint point=tEncryption.getCipherText();
 			System.out.println("The x coordinate of cipherText "+(i+1)+" is: "+point.getAffineXCoord());
 			System.out.println("The y coordinate of cipherText "+(i+1)+" is: "+point.getAffineYCoord());
 			System.out.println("");
+			ciphertexts.add(point);
 			utEcPoint=tEncryption.getut();
 			
 		}
 		
 		
 		
+	}
+	private static void testDecryption() {
+		System.out.println("---------------------------------------");
+		System.out.println("Decryption");
+		System.out.println("---------------------------------------");
+		ECPoint cipherPoint=ciphertexts.get(0).multiply(w.get(0)).normalize();
+		for(int i=1;i<w.size();i++) {
+			ECPoint temPoint=ciphertexts.get(i).multiply(w.get(i)).normalize();
+			cipherPoint=cipherPoint.add(temPoint).normalize();
+			
+		}
+		System.out.println("The x coordinate of cipherPoint "+" is: "+cipherPoint.getAffineXCoord());
+		System.out.println("The y coordinate of cipherPoint "+" is: "+cipherPoint.getAffineYCoord());
+		System.out.println("");
+		ECPoint result= cipherPoint.subtract(utEcPoint.getKey().multiply(fsk.getKey()).normalize()).normalize();
+		result= result.subtract(utEcPoint.getValue().multiply(fsk.getValue()).normalize()).normalize();
+		
+		System.out.println("The x coordinate of the result is "+result.getAffineXCoord());
+		System.out.println("The y coordinate of the result is "+result.getAffineYCoord());
+		
+		
+		
+		//Calculate X(t)
+		BigInteger x=BigInteger.valueOf(0);
+		for(int i=0;i<w.size();i++) {
+			x=x.add(w.get(i).multiply(plaintexts.get(i)));
+		}
+		System.out.println("X(t) is "+x.toString());
+		ECPoint gx=g.multiply(x).normalize();
+		
+		
+		
+		System.out.println("The x coordinate of the g*X(t) is "+gx.getAffineXCoord());
+		System.out.println("The y coordinate of the g*X(t) is "+gx.getAffineYCoord());
+		System.out.println(gx.equals(result));
+		
+		
+		ECPoint testEcPoint=utEcPoint.getKey().multiply(fsk.getKey()).normalize();
+		testEcPoint=testEcPoint.add(utEcPoint.getValue().multiply(fsk.getValue())).normalize();
+		testEcPoint=testEcPoint.add(gx).normalize();
+		System.out.println("The x coordinate of the testEcPoint is "+testEcPoint.getAffineXCoord());
+		System.out.println("The y coordinate of the testEcPoint is "+testEcPoint.getAffineYCoord());
+		System.out.println(testEcPoint.equals(cipherPoint));
+	
 	}
 	public static BigInteger nextRandomBigInteger(Integer securityParameter) {
 		BigInteger n=TWO.pow(securityParameter);

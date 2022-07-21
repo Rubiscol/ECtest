@@ -25,7 +25,6 @@ public class Encryption {
 	}
 	public Pair<ECPoint, ECPoint> getut() throws NoSuchAlgorithmException {
 		
-//		BigInteger h1=testUROP.nextRandomBigInteger(testUROP.securityParameter);
 		BigInteger h1=SHA256Calculator.doSHA256(label);
 		BigInteger h2=SHA256Calculator.doSHA256(h1);
 		ut=new Pair<ECPoint, ECPoint>(G.multiply(h1).normalize(), G.multiply(h2).normalize());
@@ -36,9 +35,9 @@ public class Encryption {
 		
 		
 		ut=getut();
-		ECPoint p1=ut.getKey().multiply(encryptionkey.getKey());
-		ECPoint p2=ut.getValue().multiply(encryptionkey.getValue());
-		ECPoint p3=G.multiply(originalmessage);
+		ECPoint p1=ut.getKey().multiply(encryptionkey.getKey()).normalize();
+		ECPoint p2=ut.getValue().multiply(encryptionkey.getValue()).normalize();
+		ECPoint p3=G.multiply(originalmessage).normalize();
 		ECPoint p4=p2.add(p3);
 		ECPoint finalEcPoint=p1.add(p4);
 		return finalEcPoint.normalize();
